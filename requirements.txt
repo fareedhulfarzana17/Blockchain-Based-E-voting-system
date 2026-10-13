@@ -1,0 +1,5 @@
+Flask
+Flask-SQLAlchemy
+Flask-Mail
+opencv-python
+Werkzeug
