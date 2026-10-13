@@ -48,13 +48,11 @@ blockchain-e-voting-system/
 │   ├── register.html
 │   ├── result.html
 │   ├── voting_page.html
-│   └── party/
 │
 └── video_records/
     └── Sample video recordings
 ```
 
-*Note: The structure above is based on the project files. The database, JSON file, and sample uploads may change as the application runs.*
 
 ## How to Run on Windows
 
