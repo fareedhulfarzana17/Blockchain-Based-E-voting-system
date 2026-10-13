@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+
+    <style>
+        body {
+            background: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        .login-box {
+            width: 300px;
+            max-width: calc(100% - 60px);
+            margin: auto;
+            padding: 25px;
+            border: 1px solid limegreen;
+            box-shadow: 0 0 10px limegreen;
+        }
+
+        input {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: limegreen;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        h2 {
+            color: limegreen;
+        }
+        
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #00ff00;
+}
+
+    </style>
+    
+</head>
+
+<body>
+    <div class="login-box">
+        <h2>Admin Login</h2>
+        
+<a href="{{ url_for('dashboard') }}" class="close-btn" title="Back to Home">&times;</a>
+
+
+        <form method="POST" action="{{ url_for('admin_login') }}">
+            <input
+                type="text"
+                name="admin_id"
+                placeholder="Admin ID"
+                required
+            >
+
+            <input
+                type="password"
+                name="admin_password"
+                placeholder="Admin Password"
+                required
+            >
+
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+     {% if message %}
+        <script>
+            alert("{{ message }}");
+        </script>
+    {% endif %}
+</body>
+</html>
