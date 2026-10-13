@@ -1,4 +1,4 @@
-# Blockchain-Based-E-voting-system
+# Blockchain-Based E-Voting System
 
 ## About the Project
 This is an academic web application developed to explore electronic voting and blockchain concepts using Python and web technologies. It includes voter registration, authentication, vote submission, video recording, and result viewing.
@@ -22,6 +22,7 @@ This is an academic web application developed to explore electronic voting and b
 
 ## Project Structure
 
+```text
 blockchain-e-voting-system/
 │
 ├── app.py
@@ -47,12 +48,13 @@ blockchain-e-voting-system/
 │   ├── register.html
 │   ├── result.html
 │   ├── voting_page.html
-│ 
+│   └── party/
 │
 └── video_records/
     └── Sample video recordings
+```
 
-
+*Note: The structure above is based on the project files. The database, JSON file, and sample uploads may change as the application runs.*
 
 ## How to Run on Windows
 
@@ -67,15 +69,19 @@ blockchain-e-voting-system/
 3. Click the folder's address bar, type `cmd`, and press **Enter**. Command Prompt will open in that folder.
 4. Install the required dependencies by running:
 
+   ```bash
    python -m pip install -r requirements.txt
+   ```
 
 5. Start the application:
 
+   ```bash
    python app.py
+   ```
 
 6. Open the local URL displayed in CMD, usually:
 
-   http://127.0.0.1:5000
+   `http://127.0.0.1:5000`
 
 7. Use the application in your browser.
 
