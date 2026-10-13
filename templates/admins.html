@@ -1,0 +1,260 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - User Details</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        body {
+            background-color: black;
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding-top: 130px;
+            padding-bottom: 30px;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #111;
+            padding: 15px 25px;
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.5);
+            position: fixed;
+            width: 100%;
+            box-sizing: border-box;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+        }
+
+        .navbar .logo img {
+            width: 80px;
+        }
+
+        .navbar .menu {
+            list-style: none;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar .menu li {
+            white-space: nowrap;
+        }
+
+        .navbar .menu li a {
+            color: #00ff00;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 8px;
+            transition: 0.3s;
+        }
+
+        .navbar .menu li a:hover {
+            background: #009900;
+            border-radius: 5px;
+        }
+
+        h1 {
+            color: limegreen;
+            margin-top: 25px;
+        }
+
+        .table-container {
+            width: 95%;
+            margin: 20px auto;
+            overflow-x: auto;
+            box-shadow: 0 0 10px limegreen;
+        }
+
+        table {
+            width: 100%;
+            min-width: 1100px;
+            border-collapse: collapse;
+            background-color: #222;
+        }
+
+        th, td {
+            border: 1px solid limegreen;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: limegreen;
+            color: black;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #333;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 15px;
+            margin: 5px;
+            color: black;
+            background-color: limegreen;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .btn:hover {
+            background-color: white;
+            color: black;
+        }
+
+        .status-voted {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        .status-not-voted {
+            color: #ffcc66;
+            font-weight: bold;
+        }
+
+        .no-video {
+            color: #ffcc66;
+        }
+
+        @media (max-width: 600px) {
+            .navbar {
+                padding: 10px;
+            }
+
+            .navbar .logo img {
+                width: 55px;
+            }
+
+            .navbar .menu {
+                gap: 4px;
+            }
+
+            .navbar .menu li a {
+                padding: 5px;
+                font-size: 12px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+
+    <script>
+        // Refresh the admin page every 500 seconds.
+        setInterval(function() {
+            location.reload();
+        }, 500000);
+    </script>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('dashboard') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}"
+                     alt="E-Voting Logo">
+            </a>
+        </div>
+
+        <ul class="menu">
+            <li><a href="{{ url_for('dashboard') }}">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admin_login') }}">Admin</a></li>
+        </ul>
+    </nav>
+
+    <h1>Admin Panel - Registered Users</h1>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Voter ID</th>
+                    <th>Aadhaar ID</th>
+                    <th>Phone Number</th>
+                    <th>Voted</th>
+                    <th>Aadhaar Card</th>
+                    <th>Video</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.first_name }}</td>
+                    <td>{{ user.last_name }}</td>
+                    <td>{{ user.voter_id }}</td>
+                    <td>{{ user.aadhaar_id }}</td>
+                    <td>{{ user.phone_number }}</td>
+
+                    <td>
+                        {% if user.voted %}
+                            <span class="status-voted">Yes</span>
+                        {% else %}
+                            <span class="status-not-voted">No</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if user.aadhaar_card_path %}
+                            <a href="{{ url_for('view_aadhaar', user_id=user.id) }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn">
+                                View Aadhaar
+                            </a>
+                        {% else %}
+                            No Aadhaar Uploaded
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if user.video_path %}
+                            <a href="{{ url_for('view_user_video', user_id=user.id) }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="btn">
+                                Watch Video
+                            </a>
+                        {% else %}
+                            <span class="no-video">No Recording Available</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9">No registered users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}" class="btn">Back to Home</a>
+
+</body>
+</html>

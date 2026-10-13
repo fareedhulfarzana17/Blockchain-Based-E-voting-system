@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Page</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='styles.css') }}">
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: black;
+            color: white;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #111;
+            padding: 15px 25px;
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .logo img {
+            width: 90px;
+        }
+
+        .menu {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        a {
+            color: #00ff00;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        a:hover {
+            color: #009900;
+        }
+
+        .container {
+            background: #111;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 255, 0, 0.5);
+            max-width: 600px;
+            width: calc(100% - 50px);
+            margin: 50px auto;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: #00ff00;
+        }
+
+        #timer {
+            font-size: 20px;
+            color: #00ff00;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            background: #222;
+            margin: 15px 0;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 8px;
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 5px;
+            box-sizing: border-box;
+            margin-top: 10px;
+        }
+
+        select {
+            background: #222;
+            color: white;
+            border: 1px solid #00ff00;
+        }
+
+        button {
+            background: #00ff00;
+            color: black;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        button:hover {
+            background: #009900;
+        }
+
+        button:disabled {
+            background: #777;
+            cursor: not-allowed;
+        }
+
+        #status {
+            color: #00ff00;
+            overflow-wrap: anywhere;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="logo">
+            <a href="{{ url_for('dashboard') }}">
+                <img src="{{ url_for('static', filename='logo.png') }}"
+                     alt="E-Voting Logo">
+            </a>
+        </div>
+
+        <ul class="menu">
+            <li><a href="/">Home</a></li>
+            <li><a href="{{ url_for('register') }}">Register</a></li>
+            <li><a href="{{ url_for('login') }}">Login</a></li>
+            <li><a href="{{ url_for('result_page') }}">Results</a></li>
+            <li><a href="{{ url_for('admin_login') }}">Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2>Cast Your Vote</h2>
+
+        <p id="timer">Time Left: 1:00</p>
+
+        <video id="video" autoplay muted playsinline></video>
+
+        <p id="status">Starting camera...</p>
+
+        <form id="voteForm">
+            <label for="candidate">Select Your Party:</label>
+
+            <select id="candidate" name="candidate" required>
+                <option value="AIADMK(All India Anna Dravida Munnetra Kazhagam)">
+                    AIADMK (All India Anna Dravida Munnetra Kazhagam)
+                </option>
+
+                <option value="DMK(Dravida Munnetra Kazhagam)">
+                    DMK (Dravida Munnetra Kazhagam)
+                </option>
+
+                <option value="TVK(Tamizhaga Vetri kazhgam)">
+                    TVK (Tamizhaga Vetri Kazhgam)
+                </option>
+
+                <option value="DMDK(Desiya Murpokku Dravida Kazhagam)">
+                    DMDK (Desiya Murpokku Dravida Kazhagam)
+                </option>
+
+                <option value="NTK(Naam Tamilar Katchi)">
+                    NTK (Naam Tamilar Katchi)
+                </option>
+
+                <option value="VCK(Viduthalai Chiruthaigal Katchi)">
+                    VCK (Viduthalai Chiruthaigal Katchi)
+                </option>
+
+                <option value="AAP(Aam Aadmi Party)">
+                    AAP (Aam Aadmi Party)
+                </option>
+
+                <option value="BSP(Bahujan Samaj Party)">
+                    BSP (Bahujan Samaj Party)
+                </option>
+
+                <option value="BJP(Bharatiya Janata Party)">
+                    BJP (Bharatiya Janata Party)
+                </option>
+
+                <option value="INC(Indian National Congress)">
+                    INC (Indian National Congress)
+                </option>
+            </select>
+
+            <button type="submit" id="submitButton" disabled>
+                Submit Vote
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const video = document.getElementById("video");
+        const voteForm = document.getElementById("voteForm");
+        const submitButton = document.getElementById("submitButton");
+        const timerElement = document.getElementById("timer");
+        const statusElement = document.getElementById("status");
+
+        let cameraStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+
+        let timeLeft = 30;
+        let timerInterval = null;
+
+        let submitting = false;
+        let expiredRecording = false;
+        let voteSubmitted = false;
+        let recordingFinished = false;
+
+        // Start the camera and video recording.
+        async function startCamera() {
+            try {
+                if (!navigator.mediaDevices ||
+                    !navigator.mediaDevices.getUserMedia) {
+                    throw new Error(
+                        "Camera access requires HTTPS or localhost."
+                    );
+                }
+
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: false
+                });
+
+                video.srcObject = cameraStream;
+
+                if (!window.MediaRecorder) {
+                    throw new Error(
+                        "Video recording is not supported by this browser."
+                    );
+                }
+
+                let options = {};
+
+                // Use WebM when supported by the browser.
+                if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+                    options.mimeType = "video/webm;codecs=vp8";
+                } else if (MediaRecorder.isTypeSupported("video/webm")) {
+                    options.mimeType = "video/webm";
+                }
+
+                mediaRecorder = new MediaRecorder(cameraStream, options);
+                recordedChunks = [];
+
+                mediaRecorder.ondataavailable = function(event) {
+                    if (event.data && event.data.size > 0) {
+                        recordedChunks.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async function() {
+                    if (recordingFinished) {
+                        return;
+                    }
+
+                    recordingFinished = true;
+
+                    // Stop the camera only after recording has finished.
+                    if (cameraStream) {
+                        cameraStream.getTracks().forEach(track => track.stop());
+                    }
+
+                    video.srcObject = null;
+
+                    // Upload only when the user submits or time expires.
+                    if (!submitting) {
+                        return;
+                    }
+
+                    const mimeType =
+                        mediaRecorder.mimeType || "video/webm";
+
+                    const videoBlob = new Blob(recordedChunks, {
+                        type: mimeType
+                    });
+
+                    if (videoBlob.size === 0) {
+                        statusElement.textContent =
+                            "The recording is empty. No video was uploaded.";
+                        submitButton.disabled = true;
+                        alert("The recording is empty. Please try again.");
+                        return;
+                    }
+
+                    const formData = new FormData();
+
+                    formData.append(
+                        "video",
+                        videoBlob,
+                        "recording.webm"
+                    );
+
+                    if (expiredRecording) {
+                        // Backend must save this recording without counting a vote.
+                        formData.append("expired", "true");
+                    } else {
+                        formData.append(
+                            "candidate",
+                            document.getElementById("candidate").value
+                        );
+                    }
+
+                    statusElement.textContent = expiredRecording
+                        ? "Time expired. Saving your recording..."
+                        : "Uploading recording and submitting your vote...";
+
+                    try {
+                        const response = await fetch("/submit_vote", {
+                            method: "POST",
+                            body: formData
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            throw new Error(
+                                data.error || "Unable to save the recording."
+                            );
+                        }
+
+                        if (expiredRecording) {
+                            statusElement.textContent =
+                                "Recording saved. No vote was counted.";
+
+                            alert(
+                                "Your time has expired. Your recording was saved for admin review. No vote was counted."
+                            );
+                        } else {
+                            voteSubmitted = true;
+
+                            statusElement.textContent =
+                                data.message || "Vote submitted successfully!";
+
+                            alert(
+                                data.message || "Vote submitted successfully!"
+                            );
+                        }
+
+                        // Redirect only after the server confirms the upload.
+                        window.location.href = "/logout";
+
+                    } catch (error) {
+                        console.error("Upload error:", error);
+
+                        statusElement.textContent =
+                            "Upload failed: " + error.message;
+
+                        alert(
+                            "The recording could not be saved. Please check the server and try again. " +
+                            error.message
+                        );
+
+                        submitButton.disabled = true;
+                    }
+                };
+
+                mediaRecorder.start();
+
+                statusElement.textContent =
+                    "Camera ready. Recording started.";
+
+                submitButton.disabled = false;
+
+                // Start the 30-second countdown after recording starts.
+                updateTimer();
+                timerInterval = setInterval(updateTimer, 1000);
+
+            } catch (error) {
+                console.error("Camera error:", error);
+
+                statusElement.textContent = error.message;
+
+                alert(
+                    "Unable to start the camera. Please allow camera access and reload the page."
+                );
+            }
+        }
+
+        // Display the countdown and handle expiry.
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 30);
+            const seconds = timeLeft % 30;
+
+            timerElement.textContent =
+                `Time Left: ${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+
+                // IMPORTANT: upload the video even if no vote was cast.
+                expiredRecording = true;
+                submitting = true;
+                submitButton.disabled = true;
+
+                statusElement.textContent =
+                    "Time expired. Saving your recording...";
+
+                if (mediaRecorder &&
+                    mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                } else {
+                    submitting = false;
+                    statusElement.textContent =
+                        "Recording stopped before it could be uploaded.";
+                }
+
+                return;
+            }
+
+            timeLeft--;
+        }
+
+        // Submit a vote when the user clicks Submit Vote.
+        voteForm.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            if (submitting || voteSubmitted) {
+                return;
+            }
+
+            if (!mediaRecorder ||
+                mediaRecorder.state !== "recording") {
+                alert("Camera recording is not ready. Please try again.");
+                return;
+            }
+
+            if (timeLeft <= 0) {
+                alert("Your voting time has expired.");
+                return;
+            }
+
+            submitting = true;
+            expiredRecording = false;
+            submitButton.disabled = true;
+
+            clearInterval(timerInterval);
+
+            statusElement.textContent =
+                "Finishing recording. Please wait...";
+
+            // The onstop handler will upload the video and candidate.
+            mediaRecorder.stop();
+        });
+
+        // Start everything.
+        startCamera();
+    </script>
+
+</body>
+</html>
