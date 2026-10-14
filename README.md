@@ -83,6 +83,15 @@ blockchain-e-voting-system/
 
 7. Use the application in your browser.
 
+## Demo Login Credentials
+
+Use the following credentials to access the admin page for demonstration purposes.
+
+- **Admin ID:** `admin@123`
+- **Password:** `admin@123`
+
+**Note:** These credentials are intended for this academic demonstration project only.
+
 ## Documentation
 The project report provides additional information about the project objectives, workflow, technologies, and implementation.
 
